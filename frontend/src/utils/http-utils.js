@@ -1,16 +1,28 @@
 import config from "../config/config.js";
+import {AuthUtils} from "./auth-utils.js";
 
 export class HttpUtils {
-    static async request(url, method = "GET", body = null) {
+    static async request(url, method = "GET", useAuth = true, body = null) {
         const result = {
             error: false,
-            response: null
+            response: null,
         }
+
         const params = {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                // 'authorization': token,
+            }
+        }
+
+        let token = null;
+
+        if (useAuth) {
+            token = AuthUtils.getAuthInfo(AuthUtils.accessTokenKey);
+            if (token) {
+                params.headers["authorization"] = token;
             }
         }
 
@@ -27,8 +39,21 @@ export class HttpUtils {
             return result;
         }
 
-        if(response.status < 200 || response.status >=300) {
+        if (response.status < 200 || response.status >= 300) {
             result.error = true;
+
+            if (useAuth && response.status === 401) {
+                if (!token) {
+                    result.redirect = '/login';
+                } else {
+                    const updateTokenResult = await AuthUtils.updateRefreshToken();
+                    if (updateTokenResult) {
+                        return this.request(url, method, useAuth, body);
+                    } else {
+                        result.redirect = '/login';
+                    }
+                }
+            }
         }
         return result;
     }

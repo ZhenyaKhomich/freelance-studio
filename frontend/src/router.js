@@ -4,6 +4,10 @@ import {SignUp} from "./components/auth/sign-up.js";
 import {Logout} from "./components/auth/logout.js";
 import {FreelancersList} from "./components/freelancers/freelancers-list.js";
 import {FileUtils as FileUnits} from "./utils/file-utils.js";
+import {FreelancersView} from "./components/freelancers/freelancers-view.js";
+import {FreelancersCreate} from "./components/freelancers/freelancers-create.js";
+import {FreelancersEdit} from "./components/freelancers/freelancers-edit.js";
+import {FreelancersDelete} from "./components/freelancers/freelancers-delete.js";
 
 export class Router {
     constructor() {
@@ -78,6 +82,41 @@ export class Router {
                 styles: ['dataTables.bootstrap4.min.css'],
                 scripts: ['jquery.dataTables.min.js', 'dataTables.bootstrap4.min.js']
             },
+            {
+                route: '/freelancers/view',
+                title: 'Фрилансер',
+                filePathTemplate: '/templates/pages/freelancers/view.html',
+                useLayout: '/templates/layout.html',
+                load: () => {
+                    new FreelancersView(this.openNewRoute.bind(this));
+                },
+            },
+            {
+                route: '/freelancers/create',
+                title: 'Создание фрилансера',
+                filePathTemplate: '/templates/pages/freelancers/create.html',
+                useLayout: '/templates/layout.html',
+                load: () => {
+                    new FreelancersCreate(this.openNewRoute.bind(this));
+                },
+                scripts: ['bs-custom-file-input.min.js']
+            },
+            {
+                route: '/freelancers/edit',
+                title: 'Редактирование фрилансера',
+                filePathTemplate: '/templates/pages/freelancers/edit.html',
+                useLayout: '/templates/layout.html',
+                load: () => {
+                    new FreelancersEdit(this.openNewRoute.bind(this));
+                },
+                scripts: ['bs-custom-file-input.min.js']
+            },
+            {
+                route: '/freelancers/delete',
+                load: () => {
+                    new FreelancersDelete(this.openNewRoute.bind(this));
+                },
+            },
         ]
     }
 
@@ -120,13 +159,17 @@ export class Router {
             const currentRoute = this.routes.find(item => item.route === oldRoute);
             if (currentRoute.styles && currentRoute.styles.length > 0) {
                 currentRoute.styles.forEach(style => {
-                    document.querySelector(`link[href='/css/${style}']`).remove();
+                    if(document.querySelector(`link[href='/css/${style}']`)) {
+                        document.querySelector(`link[href='/css/${style}']`).remove();
+                    }
                 })
             }
 
             if (currentRoute.scripts && currentRoute.scripts.length > 0) {
                 currentRoute.scripts.forEach(file => {
-                    document.querySelector(`script[href='/js/${file}']`).remove();
+                    if(document.querySelector(`script[href='/js/${file}']`)) {
+                        document.querySelector(`script[href='/js/${file}']`).remove();
+                    }
                 })
             }
 

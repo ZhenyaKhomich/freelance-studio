@@ -29,8 +29,10 @@ export class Router {
                 filePathTemplate: '/templates/pages/dashboard.html',
                 useLayout: '/templates/layout.html',
                 load: () => {
-                    new Dashboard();
-                }
+                    new Dashboard(this.openNewRoute.bind(this));
+                },
+                scripts: ['moment.min.js', 'moment-ru-locale.js', 'fullcalendar.js', 'fullcalendar-locale-ru.js'],
+                styles: ['fullcalendar.css']
             },
             {
                 route: '/404',
@@ -260,6 +262,7 @@ export class Router {
                     contentBlock = document.getElementById('content-layout');
                     document.body.classList.add('sidebar-mini');
                     document.body.classList.add('layout-fixed');
+                    this.activateMenuItem(newRoute);
                 } else {
                     document.body.classList.remove('sidebar-mini');
                     document.body.classList.remove('layout-fixed');
@@ -275,5 +278,17 @@ export class Router {
             history.pushState({}, '', '/404');
             await this.activateRoute();
         }
+    }
+
+    activateMenuItem(route) {
+        document.querySelectorAll('.sidebar .nav-link').forEach((item) => {
+            const href = item.getAttribute('href');
+            if((route.route.includes(href) && href !== '/') || (route.route === '/' && href === '/') ) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        })
+
     }
 }

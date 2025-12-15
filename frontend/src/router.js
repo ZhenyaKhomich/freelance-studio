@@ -13,12 +13,14 @@ import {OrdersView} from "./components/orders/orders-view.js";
 import {OrdersCreate} from "./components/orders/orders-create.js";
 import {OrdersEdit} from "./components/orders/orders-edit.js";
 import {OrdersDelete} from "./components/orders/orders-delete.js";
+import {AuthUtils} from "./utils/auth-utils";
 
 export class Router {
     constructor() {
         this.titlePageElement = document.getElementById('title');
         this.contentPageElement = document.getElementById('content');
         this.adminLteStyleElement = document.getElementById('adminlte_style');
+        this.userName = null;
 
         this.initEvents();
 
@@ -214,7 +216,7 @@ export class Router {
             const currentRoute = this.routes.find(item => item.route === oldRoute);
             if (currentRoute.styles && currentRoute.styles.length > 0) {
                 currentRoute.styles.forEach(style => {
-                    if(document.querySelector(`link[href='/css/${style}']`)) {
+                    if (document.querySelector(`link[href='/css/${style}']`)) {
                         document.querySelector(`link[href='/css/${style}']`).remove();
                     }
                 })
@@ -222,7 +224,7 @@ export class Router {
 
             if (currentRoute.scripts && currentRoute.scripts.length > 0) {
                 currentRoute.scripts.forEach(file => {
-                    if(document.querySelector(`script[href='/js/${file}']`)) {
+                    if (document.querySelector(`script[href='/js/${file}']`)) {
                         document.querySelector(`script[href='/js/${file}']`).remove();
                     }
                 })
@@ -244,7 +246,7 @@ export class Router {
             }
 
             if (newRoute.scripts && newRoute.scripts.length > 0) {
-                for(const script of newRoute.scripts) {
+                for (const script of newRoute.scripts) {
                     await FileUnits.loadPageScript('/js/' + script);
                 }
             }
@@ -262,6 +264,20 @@ export class Router {
                     contentBlock = document.getElementById('content-layout');
                     document.body.classList.add('sidebar-mini');
                     document.body.classList.add('layout-fixed');
+
+                    this.profileNameElement = document.getElementById('profile-name');
+                    if (!this.userName) {
+                        let userInfo = AuthUtils.getAuthInfo(AuthUtils.userInfoTokenKey);
+                        if (userInfo) {
+                            userInfo = JSON.parse(userInfo);
+                            if (userInfo.name) {
+                                this.userName = userInfo.name;
+                            }
+                        }
+                    }
+                    this.profileNameElement.innerText = this.userName;
+
+
                     this.activateMenuItem(newRoute);
                 } else {
                     document.body.classList.remove('sidebar-mini');
@@ -283,12 +299,11 @@ export class Router {
     activateMenuItem(route) {
         document.querySelectorAll('.sidebar .nav-link').forEach((item) => {
             const href = item.getAttribute('href');
-            if((route.route.includes(href) && href !== '/') || (route.route === '/' && href === '/') ) {
+            if ((route.route.includes(href) && href !== '/') || (route.route === '/' && href === '/')) {
                 item.classList.add('active');
             } else {
                 item.classList.remove('active');
             }
         })
-
     }
 }
